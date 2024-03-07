@@ -10,6 +10,7 @@ let classAConstructor =
 
 let classA =
     { ClassName = TypeName "A"
+      Generics = []
       SuperclassName = TypeName "Object"
       Fields = []
       Constructor = classAConstructor
@@ -17,26 +18,28 @@ let classA =
 
 let classBConstructor =
     { ClassName = TypeName "B"
-      Fields = [ (TypeName "A", FieldName "b_a1"); (TypeName "A", FieldName "b_a2") ] }
+      Fields = [ (boringType "A", FieldName "b_a1"); (boringType "A", FieldName "b_a2") ] }
 
 let classB =
     { ClassName = TypeName "B"
+      Generics = []
       SuperclassName = TypeName "Object"
-      Fields = [ (TypeName "A", FieldName "b_a1"); (TypeName "A", FieldName "b_a2") ]
+      Fields = [ (boringType "A", FieldName "b_a1"); (boringType "A", FieldName "b_a2") ]
       Constructor = classBConstructor
       Methods = [] }
 
 let classCConstructor =
     { ClassName = TypeName "A"
       Fields =
-        [ (TypeName "A", FieldName "b_a1")
-          (TypeName "A", FieldName "b_a2")
-          (TypeName "A", FieldName "c_a1") ] }
+        [ (boringType "A", FieldName "b_a1")
+          (boringType "A", FieldName "b_a2")
+          (boringType "A", FieldName "c_a1") ] }
 
 let classC =
     { ClassName = TypeName "C"
+      Generics = []
       SuperclassName = TypeName "B"
-      Fields = [ (TypeName "A", FieldName "c_a1") ]
+      Fields = [ (boringType "A", FieldName "c_a1") ]
       Constructor = classCConstructor
       Methods = [] }
 

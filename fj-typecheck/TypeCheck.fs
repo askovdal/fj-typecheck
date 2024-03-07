@@ -23,6 +23,7 @@ module ClassTable =
         if className |> isObject then
             let objectClass =
                 { ClassName = TypeName "Object"
+                  Generics = []
                   SuperclassName = TypeName "Object"
                   Fields = []
                   Constructor =
@@ -47,14 +48,14 @@ let fieldsDistinctFromSuperclass ((classDef, classTable): State) =
         | None -> Ok(classDef, classTable)
         | Some field -> Error $"Field {fieldName field} already defined in superclass {typeString superclass.ClassName}"
 
-let fieldsTypesDefined ((classDef, classTable): State) =
-    let fieldTypeUndefined (typeName, _) =
-        classTable |> ClassTable.containsClass typeName |> not
-
-    match classDef.Fields |> List.tryFind fieldTypeUndefined with
-    | None -> Ok(classDef, classTable)
-    | Some undefinedField ->
-        Error $"Field with name {fieldName undefinedField} has undefined type {fieldType undefinedField}"
+// let fieldsTypesDefined ((classDef, classTable): State) =
+//     let fieldTypeUndefined (typeName, _) =
+//         classTable |> ClassTable.containsClass typeName |> not
+//
+//     match classDef.Fields |> List.tryFind fieldTypeUndefined with
+//     | None -> Ok(classDef, classTable)
+//     | Some undefinedField ->
+//         Error $"Field with name {fieldName undefinedField} has undefined type {fieldType undefinedField}"
 
 let typeCheckConstructor ((classDef, classTable): State) =
     let rec collectFields (classDef: Class) : Result<Field list, string> =
@@ -80,7 +81,7 @@ let typeCheckClass ((classDef, classTable): State) =
     let result =
         Ok(classDef, classTable)
         |> Result.bind fieldsDistinctFromSuperclass
-        |> Result.bind fieldsTypesDefined
+        // |> Result.bind fieldsTypesDefined
         |> Result.bind typeCheckConstructor
 
     match result with
