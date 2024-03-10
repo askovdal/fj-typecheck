@@ -1,18 +1,20 @@
-module TypeCheck.TypeCheck
+module TypeCheck.Main
 
 open AST
-open TypeCheck.ClassGenerics
+open TypeCheck.TypeParameters
 open TypeCheck.Superclass
 open TypeCheck.ClassFields
 open TypeCheck.Constructor
+open TypeCheck.Methods
 
 let typeCheckClass ((classDef, classTable): State) =
     let result =
         Ok(classDef, classTable)
-        |> Result.bind typeCheckClassGenerics
+        |> Result.bind typeCheckTypeParameters
         |> Result.bind typeCheckSuperclass
         |> Result.bind typeCheckClassFields
         |> Result.bind typeCheckConstructor
+        |> Result.bind typeCheckMethods
 
     match result with
     | Ok(_, classTable) -> Ok classTable

@@ -1,17 +1,45 @@
-module ClassesTest
+module Tests.PaperExample
 
 open AST
-open TypeCheck.TypeCheck
+
+(*
+class A extends Object {
+    A() {
+        super();
+    }
+}
+
+class B extends Object {
+    B() {
+        super();
+    }
+}
+
+class Pair<X extends Object, Y extends Object> extends Object {
+    X fst;
+    Y snd;
+
+    Pair(X fst, Y snd) {
+        super();
+        this.fst = fst;
+        this.snd = snd;
+    }
+
+    <Z extends Object> Pair<Z, Y> setfst(Z newfst) {
+        return new Pair<Z, Y>(newfst, this.snd);
+    }
+}
+*)
 
 let objectType =
     { ClassName = ClassName "Object"
-      Generics = [] }
+      TypeArguments = [] }
 
 let classAConstructor = { Parameters = [] }
 
 let classA =
     { Name = ClassName "A"
-      Generics = []
+      TypeParameters = []
       Superclass = objectType
       Fields = []
       Constructor = classAConstructor
@@ -21,7 +49,7 @@ let classBConstructor = { Parameters = [] }
 
 let classB =
     { Name = ClassName "B"
-      Generics = []
+      TypeParameters = []
       Superclass = objectType
       Fields = []
       Constructor = classBConstructor
@@ -36,10 +64,10 @@ let classPairConstructor =
 
 let pairZY =
     { ClassName = ClassName "Pair"
-      Generics = [ TypeVariable(TypeVariableName "Z"); TypeVariable(TypeVariableName "Y") ] }
+      TypeArguments = [ TypeVariable(TypeVariableName "Z"); TypeVariable(TypeVariableName "Y") ] }
 
 let setFst =
-    { Generics =
+    { TypeParameters =
         [ { Name = TypeVariableName "Z"
             Bound = objectType } ]
       ReturnType = NonvariableType pairZY
@@ -58,7 +86,7 @@ let setFst =
 
 let classPair =
     { Name = ClassName "Pair"
-      Generics =
+      TypeParameters =
         [ { Name = TypeVariableName "X"
             Bound = objectType }
           { Name = TypeVariableName "Y"
@@ -71,14 +99,3 @@ let classPair =
             Name = FieldName "snd" } ]
       Constructor = classPairConstructor
       Methods = [ setFst ] }
-
-let classTable =
-    ClassTable.empty |> ClassTable.addClasses [ classA; classB; classPair ]
-
-let result = typeCheckClassTable classTable
-
-match result with
-| Ok _ -> printfn "Type check success"
-| Error err -> printfn $"%A{err}"
-
-let foo = 0

@@ -7,12 +7,14 @@
 
     <ItemGroup>
         <Compile Include="AST.fs" />
-        <Compile Include="TypeCheck\ClassGenerics.fs" />
         <Compile Include="TypeCheck\Superclass.fs" />
         <Compile Include="TypeCheck\ClassFields.fs" />
+        <Compile Include="TypeCheck\TypeParameters.fs" />
         <Compile Include="TypeCheck\Constructor.fs" />
-        <Compile Include="TypeCheck\TypeCheck.fs" />
-        <Compile Include="ClassesTest.fs" />
+        <Compile Include="TypeCheck\Methods.fs" />
+        <Compile Include="TypeCheck\Main.fs" />
+        <Compile Include="Tests\PaperExample.fs" />
+        <Compile Include="Tests\Other.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

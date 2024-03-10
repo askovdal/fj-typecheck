@@ -12,25 +12,7 @@ type Type =
 
 and NonvariableType =
     { ClassName: ClassName
-      Generics: Type list }
-
-let rec debugType (typeDef: Type) =
-    match typeDef with
-    | TypeVariable(TypeVariableName name) -> name
-    | NonvariableType { ClassName = ClassName name
-                        Generics = generics } ->
-        let genericsString = generics |> List.map debugType |> String.concat ", "
-
-        if genericsString = "" then
-            name
-        else
-            $"{name}<{genericsString}>"
-
-/// Returns a nonvariable type with no generics
-let boringType className =
-    NonvariableType
-        { ClassName = ClassName className
-          Generics = [] }
+      TypeArguments: Type list }
 
 type TypeParameter =
     { Name: TypeVariableName
@@ -52,7 +34,7 @@ and FieldAccess =
 and MethodInvocation =
     { Object: Expression
       Method: MethodName
-      Generics: Type list
+      TypeArguments: Type list
       Arguments: Expression list }
 
 and NewInstance =
@@ -62,7 +44,7 @@ and NewInstance =
 type Constructor = { Parameters: Parameter list }
 
 type Method =
-    { Generics: TypeParameter list
+    { TypeParameters: TypeParameter list
       ReturnType: Type
       Name: MethodName
       Parameters: Parameter list
@@ -70,7 +52,7 @@ type Method =
 
 type Class =
     { Name: ClassName
-      Generics: TypeParameter list
+      TypeParameters: TypeParameter list
       Superclass: NonvariableType
       Fields: Field list
       Constructor: Constructor
@@ -96,10 +78,10 @@ module ClassTable =
         if className |> isObject then
             let objectClass =
                 { Name = ClassName "Object"
-                  Generics = []
+                  TypeParameters = []
                   Superclass =
                     { ClassName = ClassName "Object"
-                      Generics = [] }
+                      TypeArguments = [] }
                   Fields = []
                   Constructor = { Parameters = [] }
                   Methods = [] }
@@ -115,7 +97,6 @@ let typeVariableNameString (TypeVariableName typeVariableName) = typeVariableNam
 let fieldNameString (FieldName fieldName) = fieldName
 let parameterNameString (ParameterName parameterName) = parameterName
 
-
 let parameterToField
     ({ Type = typeDef
        Name = ParameterName name }: Parameter)
@@ -129,3 +110,15 @@ let fieldToParameter
     : Parameter =
     { Type = typeDef
       Name = ParameterName name }
+
+let rec debugType (typeDef: Type) =
+    match typeDef with
+    | TypeVariable(TypeVariableName name) -> name
+    | NonvariableType { ClassName = ClassName name
+                        TypeArguments = generics } ->
+        let genericsString = generics |> List.map debugType |> String.concat ", "
+
+        if genericsString = "" then
+            name
+        else
+            $"{name}<{genericsString}>"

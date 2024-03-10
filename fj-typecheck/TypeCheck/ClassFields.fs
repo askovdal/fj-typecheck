@@ -4,20 +4,19 @@ open AST
 
 type FieldState = Field * Class * ClassTable
 
+let typeVariableDefined classDef typeVariableName =
+    let typeParameterNameMatch ({ Name = name }: TypeParameter) = name = typeVariableName
+
+    match classDef.TypeParameters |> List.tryFind typeParameterNameMatch with
+    | Some typeVariable -> Ok(typeVariable)
+    | None -> Error $"Type variable '{typeVariableName |> typeVariableNameString}' not defined in type parameters"
+
 let typeCheckFieldType ((field, classDef, classTable): FieldState) =
-    let typeVariableDefined typeVariableName =
-        let typeParameterNameMatch ({ Name = name }: TypeParameter) = name = typeVariableName
-
-        if classDef.Generics |> List.exists typeParameterNameMatch then
-            Ok(field, classDef, classTable)
-        else
-            Error $"Type variable '{typeVariableName |> typeVariableNameString}' not defined in class generics"
-
     match field.Type with
-    | TypeVariable typeVariableName -> typeVariableDefined typeVariableName
+    | TypeVariable typeVariableName -> typeVariableDefined classDef typeVariableName |> Result.map (fun _ -> ())
     | NonvariableType _ ->
         // TODO: Implement
-        Ok(field, classDef, classTable)
+        Ok()
 
 let fieldNameDistinctFromSuperclass ((field, classDef, classTable): FieldState) =
     match classTable |> ClassTable.tryFind classDef.Superclass.ClassName with
@@ -34,7 +33,7 @@ let fieldNameIsUnique ((field, classDef, classTable): FieldState) =
     let fieldNameMatch (otherField: Field) = otherField.Name = field.Name
 
     match classDef.Fields |> List.filter fieldNameMatch |> List.tryExactlyOne with
-    | None -> Error $"Field name '{field.Name |> fieldNameString}' is defined more than once"
+    | None -> Error "Field name is defined more than once"
     | Some _ -> Ok(field, classDef, classTable)
 
 let typeCheckClassField ((field, classDef, classTable): FieldState) =
@@ -45,12 +44,12 @@ let typeCheckClassField ((field, classDef, classTable): FieldState) =
         |> Result.bind typeCheckFieldType
 
     match result with
-    | Ok(_, classDef, classTable) -> Ok(classDef, classTable)
+    | Ok _ -> Ok(classDef, classTable)
     | Error err -> Error $"Error in field '{field.Name |> fieldNameString}': {err}"
 
 let typeCheckClassFields ((classDef, classTable): State) =
-    let folder (state: Result<Class * ClassTable, string>) (field: Field) =
+    let folder (state: Result<State, string>) (field: Field) =
         state
-        |> Result.bind (fun (classDef, classTable) -> typeCheckClassField (field, classDef, classTable))
+        |> Result.bind (fun _ -> typeCheckClassField (field, classDef, classTable))
 
     classDef.Fields |> List.fold folder (Ok(classDef, classTable))
