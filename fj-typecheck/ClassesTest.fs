@@ -1,26 +1,26 @@
-module Thesis.ClassesTest
+module ClassesTest
 
-open Thesis.AST
-open Thesis.TypeCheck
+open AST
+open TypeCheck.TypeCheck
 
 let objectType =
-    { ClassName = TypeName "Object"
+    { ClassName = ClassName "Object"
       Generics = [] }
 
-let classAConstructor = { Fields = [] }
+let classAConstructor = { Parameters = [] }
 
 let classA =
-    { ClassName = TypeName "A"
+    { Name = ClassName "A"
       Generics = []
       Superclass = objectType
       Fields = []
       Constructor = classAConstructor
       Methods = [] }
 
-let classBConstructor = { Fields = [] }
+let classBConstructor = { Parameters = [] }
 
 let classB =
-    { ClassName = TypeName "B"
+    { Name = ClassName "B"
       Generics = []
       Superclass = objectType
       Fields = []
@@ -28,12 +28,14 @@ let classB =
       Methods = [] }
 
 let classPairConstructor =
-    { Fields =
-        [ (TypeVariable(TypeVariableName "X"), FieldName "fst")
-          (TypeVariable(TypeVariableName "Y"), FieldName "snd") ] }
+    { Parameters =
+        [ { Type = TypeVariable(TypeVariableName "X")
+            Name = ParameterName "fst" }
+          { Type = TypeVariable(TypeVariableName "Y")
+            Name = ParameterName "snd" } ] }
 
 let pairZY =
-    { ClassName = TypeName "Pair"
+    { ClassName = ClassName "Pair"
       Generics = [ TypeVariable(TypeVariableName "Z"); TypeVariable(TypeVariableName "Y") ] }
 
 let setFst =
@@ -41,30 +43,34 @@ let setFst =
         [ { Name = TypeVariableName "Z"
             Bound = objectType } ]
       ReturnType = NonvariableType pairZY
-      MethodName = MethodName "setfst"
-      Parameters = [ (TypeVariable(TypeVariableName "Z"), VariableName "newfst") ]
+      Name = MethodName "setfst"
+      Parameters =
+        [ { Type = TypeVariable(TypeVariableName "Z")
+            Name = ParameterName "newfst" } ]
       Return =
-        NewInstance(
-            pairZY,
-            [ Var(VariableName "newfst")
-              FieldAccess(Var(VariableName "this"), FieldName "snd") ]
-        ) }
+        NewInstance
+            { Class = pairZY
+              Parameters =
+                [ Variable "newfst"
+                  FieldAccess
+                      { Object = Variable "this"
+                        Field = FieldName "snd" } ] } }
 
 let classPair =
-    { ClassName = TypeName "Pair"
+    { Name = ClassName "Pair"
       Generics =
         [ { Name = TypeVariableName "X"
             Bound = objectType }
           { Name = TypeVariableName "Y"
-            Bound =
-              { ClassName = TypeName "Objecta"
-                Generics = [] } } ]
+            Bound = objectType } ]
       Superclass = objectType
       Fields =
-        [ (TypeVariable(TypeVariableName "X"), FieldName "fst")
-          (TypeVariable(TypeVariableName "Y"), FieldName "snd") ]
+        [ { Type = TypeVariable(TypeVariableName "X")
+            Name = FieldName "fst" }
+          { Type = TypeVariable(TypeVariableName "Y")
+            Name = FieldName "snd" } ]
       Constructor = classPairConstructor
-      Methods = [] }
+      Methods = [ setFst ] }
 
 let classTable =
     ClassTable.empty |> ClassTable.addClasses [ classA; classB; classPair ]

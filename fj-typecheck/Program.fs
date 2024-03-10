@@ -1,4 +1,4 @@
-﻿open Thesis.ClassesTest
+﻿open ClassesTest
 
 [<EntryPoint>]
 let main argv =
