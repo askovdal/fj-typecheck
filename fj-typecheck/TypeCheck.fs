@@ -24,11 +24,11 @@ module ClassTable =
             let objectClass =
                 { ClassName = TypeName "Object"
                   Generics = []
-                  SuperclassName = TypeName "Object"
-                  Fields = []
-                  Constructor =
+                  Superclass =
                     { ClassName = TypeName "Object"
-                      Fields = [] }
+                      Generics = [] }
+                  Fields = []
+                  Constructor = { Fields = [] }
                   Methods = [] }
 
             Some objectClass
@@ -37,56 +37,49 @@ module ClassTable =
 
 type State = Class * ClassTable
 
-let fieldsDistinctFromSuperclass ((classDef, classTable): State) =
-    match classTable |> ClassTable.tryFind classDef.SuperclassName with
-    | None -> Error $"Superclass {typeString classDef.SuperclassName} undefined"
-    | Some superclass ->
-        let superclassHasField field =
-            superclass.Fields |> List.map snd |> List.contains (snd field)
+let boundsAreDefined ((classDef, classTable): State) =
+    let boundIsUndefined { Bound = bound } =
+        classTable |> ClassTable.containsClass bound.ClassName |> not
 
-        match classDef.Fields |> List.tryFind superclassHasField with
-        | None -> Ok(classDef, classTable)
-        | Some field -> Error $"Field {fieldName field} already defined in superclass {typeString superclass.ClassName}"
+    match classDef.Generics |> List.tryFind boundIsUndefined with
+    | None -> Ok(classDef, classTable)
+    | Some generic ->
+        Error
+            $"Bound '{generic.Bound.ClassName |> typeNameString}' of type variable '{generic.Name |> typeVariableNameString}' is undefined"
 
-// let fieldsTypesDefined ((classDef, classTable): State) =
-//     let fieldTypeUndefined (typeName, _) =
-//         classTable |> ClassTable.containsClass typeName |> not
-//
-//     match classDef.Fields |> List.tryFind fieldTypeUndefined with
-//     | None -> Ok(classDef, classTable)
-//     | Some undefinedField ->
-//         Error $"Field with name {fieldName undefinedField} has undefined type {fieldType undefinedField}"
+let classGenericsAreUnique ((classDef, classTable): State) =
+    let genericIsDuplicate g1 =
+        classDef.Generics
+        |> List.filter (fun g2 -> g2.Name = g1.Name)
+        |> List.length
+        |> (<) 1
 
-let typeCheckConstructor ((classDef, classTable): State) =
-    let rec collectFields (classDef: Class) : Result<Field list, string> =
-        match classDef.SuperclassName with
-        | TypeName "Object" -> Ok classDef.Fields
-        | superclassName ->
-            match classTable |> ClassTable.tryFind superclassName with
-            | None ->
-                Error $"Superclass {typeString superclassName} in class {typeString classDef.ClassName} is undefined"
-            | Some superclass -> collectFields superclass |> Result.map ((@) classDef.Fields)
+    match classDef.Generics |> List.tryFind genericIsDuplicate with
+    | None -> Ok(classDef, classTable)
+    | Some generic -> Error $"Type variable '{generic.Name |> typeVariableNameString}' is defined more than once"
 
-    let constructorMissingField field =
-        classDef.Constructor.Fields |> List.contains field |> not
+let typeCheckClassGenerics ((classDef, classTable): State) =
+    Ok(classDef, classTable)
+    |> Result.bind classGenericsAreUnique
+    |> Result.bind boundsAreDefined
 
-    collectFields classDef
-    |> Result.bind (fun allFields ->
-        match allFields |> List.tryFind constructorMissingField with
-        | None -> Ok(classDef, classTable)
-        | Some missingField -> Error $"Field {fieldName missingField} missing in constructor")
+let superclassIsDefined ((classDef, classTable): State) =
+    match classTable |> ClassTable.tryFind classDef.Superclass.ClassName with
+    | None -> Error $"Superclass '{classDef.Superclass.ClassName |> typeNameString}' undefined"
+    | Some _ -> Ok(classDef, classTable)
 
+let typeCheckSuperclass ((classDef, classTable): State) =
+    superclassIsDefined (classDef, classTable)
 
 let typeCheckClass ((classDef, classTable): State) =
     let result =
         Ok(classDef, classTable)
-        |> Result.bind fieldsDistinctFromSuperclass
-        // |> Result.bind fieldsTypesDefined
-        |> Result.bind typeCheckConstructor
+        |> Result.bind typeCheckSuperclass
+        |> Result.bind typeCheckClassGenerics
 
     match result with
     | Ok(_, classTable) -> Ok classTable
-    | Error err -> Error $"Error in class {typeString classDef.ClassName}: {err}"
+    | Error err -> Error $"Error in class '{classDef.ClassName |> typeNameString}': {err}"
 
 let typeCheckClasses (state: Result<ClassTable, string>) (classDef: Class) =
     match state with
@@ -98,3 +91,42 @@ let typeCheckClassTable (classTable: ClassTable) =
     |> Map.values
     |> Seq.toList
     |> List.fold typeCheckClasses (Ok classTable)
+
+// let fieldsDistinctFromSuperclass ((classDef, classTable): State) =
+//     match classTable |> ClassTable.tryFind classDef.SuperclassName with
+//     | None -> Error $"Superclass {typeString classDef.SuperclassName} undefined"
+//     | Some superclass ->
+//         let superclassHasField field =
+//             superclass.Fields |> List.map snd |> List.contains (snd field)
+//
+//         match classDef.Fields |> List.tryFind superclassHasField with
+//         | None -> Ok(classDef, classTable)
+//         | Some field -> Error $"Field {fieldName field} already defined in superclass {typeString superclass.ClassName}"
+
+// let fieldsTypesDefined ((classDef, classTable): State) =
+//     let fieldTypeUndefined (typeName, _) =
+//         classTable |> ClassTable.containsClass typeName |> not
+//
+//     match classDef.Fields |> List.tryFind fieldTypeUndefined with
+//     | None -> Ok(classDef, classTable)
+//     | Some undefinedField ->
+//         Error $"Field with name {fieldName undefinedField} has undefined type {fieldType undefinedField}"
+
+// let typeCheckConstructor ((classDef, classTable): State) =
+//     let rec collectFields (classDef: Class) : Result<Field list, string> =
+//         match classDef.SuperclassName with
+//         | TypeName "Object" -> Ok classDef.Fields
+//         | superclassName ->
+//             match classTable |> ClassTable.tryFind superclassName with
+//             | None ->
+//                 Error $"Superclass {typeString superclassName} in class {typeString classDef.ClassName} is undefined"
+//             | Some superclass -> collectFields superclass |> Result.map ((@) classDef.Fields)
+//
+//     let constructorMissingField field =
+//         classDef.Constructor.Fields |> List.contains field |> not
+//
+//     collectFields classDef
+//     |> Result.bind (fun allFields ->
+//         match allFields |> List.tryFind constructorMissingField with
+//         | None -> Ok(classDef, classTable)
+//         | Some missingField -> Error $"Field {fieldName missingField} missing in constructor")

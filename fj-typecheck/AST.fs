@@ -4,7 +4,6 @@ type FieldName = FieldName of string
 type VariableName = VariableName of string
 type MethodName = MethodName of string
 type TypeName = TypeName of string
-
 type TypeVariableName = TypeVariableName of string
 
 type Type =
@@ -22,7 +21,8 @@ let boringType className =
           Generics = [] }
 
 type TypeParameter =
-    { Name: string; Bound: NonvariableType }
+    { Name: TypeVariableName
+      Bound: NonvariableType }
 
 type Field = Type * FieldName
 
@@ -34,9 +34,7 @@ type Expression =
     | MethodInvocation of Expression * MethodName * Type list * Expression list
     | NewInstance of NonvariableType * Expression list
 
-type Constructor =
-    { ClassName: TypeName
-      Fields: Field list }
+type Constructor = { Fields: Field list }
 
 type Method =
     { Generics: TypeParameter list
@@ -48,14 +46,10 @@ type Method =
 type Class =
     { ClassName: TypeName
       Generics: TypeParameter list
-      SuperclassName: TypeName
+      Superclass: NonvariableType
       Fields: Field list
       Constructor: Constructor
       Methods: Method list }
 
-let typeString (TypeName typeString) = typeString
-
-/// Returns the string inside the field's name
-let fieldName ((_, FieldName fieldName): Field) = fieldName
-// /// Returns the string inside the field's type
-// let fieldType ((TypeName fieldType, _): Field) = fieldType
+let typeNameString (TypeName typeName) = typeName
+let typeVariableNameString (TypeVariableName typeVariableName) = typeVariableName
