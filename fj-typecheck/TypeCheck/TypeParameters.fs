@@ -21,11 +21,16 @@ let typeVariableExtendsCorrectClass (state: TypeArgumentState) (typeVariable: Ty
     let typeArgument, typeParameter, classDef, classTable = state
     let shouldExtend = typeParameter.Bound.ClassName
 
-    match typeVariable.Bound.ClassName with
-    | className when className = shouldExtend -> Ok()
-    | className ->
-        // TODO: Get className's superclass. If Object, the bound is not fulfilled. Else, recurse with superclass
-        Error "implement"
+    let rec extendsCorrectClass (extends: ClassName) =
+        match extends with
+        | className when className = shouldExtend -> Ok()
+        | className when className |> isObject -> Error "Type argument does not extend correct class"
+        | className ->
+            match classTable |> ClassTable.tryFind className with
+            | None -> Error $"Class '{className |> classNameString}' not defined"
+            | Some boundClass -> extendsCorrectClass boundClass.Superclass.ClassName
+
+    extendsCorrectClass typeVariable.Bound.ClassName
 
 let typeCheckTypeArgument (state: TypeArgumentState) =
     let typeArgument, typeParameter, classDef, classTable = state

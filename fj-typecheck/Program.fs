@@ -1,4 +1,6 @@
-﻿open AST
+﻿module Program
+
+open AST
 open Tests.Other
 open TypeCheck.Main
 
