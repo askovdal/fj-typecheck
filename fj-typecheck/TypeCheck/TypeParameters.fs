@@ -5,67 +5,84 @@ open TypeCheck.ClassFields
 
 type TypeParameterState = TypeParameter * Class * ClassTable
 
-let boundHasRightAmountOfTypeArguments typeArguments boundClass =
+let boundHasRightAmountOfTypeArguments (typeArguments: Type list) (boundClass: Class) =
     let typeArgumentsLength = typeArguments |> List.length
     let typeParametersLength = boundClass.TypeParameters |> List.length
 
     if typeArgumentsLength <> typeParametersLength then
-        Error
-            $"Bound '{boundClass.Name |> classNameString}' expects {typeParametersLength} type arguments, got {typeArgumentsLength}"
+        Error $"Bound expects {typeParametersLength} type arguments, got {typeArgumentsLength}"
     else
         Ok()
 
 type TypeArgumentState = Type * TypeParameter * Class * ClassTable
 
-let typeVariableExtendsCorrectClass (state: TypeArgumentState) (typeVariable: TypeParameter) =
-    let typeArgument, typeParameter, classDef, classTable = state
+let rec classExtendsCorrectClass (classExtends: ClassName) (shouldExtend: ClassName) (classTable: ClassTable) =
+    match classExtends with
+    | className when className = shouldExtend -> Ok()
+    | className when className |> isObject ->
+        Error $"Type argument does not extend correct class, should extend '{shouldExtend |> classNameString}'"
+    | className ->
+        match classTable |> ClassTable.tryFind className with
+        | None -> Error $"Class '{className |> classNameString}' not defined"
+        | Some boundClass -> classExtendsCorrectClass boundClass.Superclass.ClassName shouldExtend classTable
+
+
+let rec typeCheckNvTypeArguments
+    (boundClass: Class)
+    (typeArguments: Type list)
+    (classDef: Class)
+    (classTable: ClassTable)
+    =
+    let folder (state: Result<unit, string>) (typeArgument: Type) (typeParameter: TypeParameter) =
+        state
+        |> Result.bind (fun _ -> typeCheckTypeArgument typeArgument typeParameter classDef classTable)
+
+    boundHasRightAmountOfTypeArguments typeArguments boundClass
+    |> Result.bind (fun _ -> (Ok(), typeArguments, boundClass.TypeParameters) |||> List.fold2 folder)
+
+/// Type checks a type argument against its corresponding type parameter.
+and typeCheckTypeArgument
+    (typeArgument: Type)
+    (typeParameter: TypeParameter)
+    (classDef: Class)
+    (classTable: ClassTable)
+    =
     let shouldExtend = typeParameter.Bound.ClassName
-
-    let rec extendsCorrectClass (extends: ClassName) =
-        match extends with
-        | className when className = shouldExtend -> Ok()
-        | className when className |> isObject -> Error "Type argument does not extend correct class"
-        | className ->
-            match classTable |> ClassTable.tryFind className with
-            | None -> Error $"Class '{className |> classNameString}' not defined"
-            | Some boundClass -> extendsCorrectClass boundClass.Superclass.ClassName
-
-    extendsCorrectClass typeVariable.Bound.ClassName
-
-let typeCheckTypeArgument (state: TypeArgumentState) =
-    let typeArgument, typeParameter, classDef, classTable = state
 
     let result =
         match typeArgument with
-        | TypeVariable typeVariableName ->
-            typeVariableDefined classDef typeVariableName
-            |> Result.bind (typeVariableExtendsCorrectClass state)
-        | NonvariableType nonvariableType -> Ok()
+        | TypeVariable typeArgumentTypeVariable ->
+            typeVariableDefined classDef typeArgumentTypeVariable
+            |> Result.bind (fun typeVariable ->
+                classExtendsCorrectClass typeVariable.Bound.ClassName shouldExtend classTable)
+
+        | NonvariableType typeArgumentNvType ->
+            match classTable |> ClassTable.tryFind typeArgumentNvType.ClassName with
+            | None -> Error $"Class '{typeArgumentNvType.ClassName |> classNameString}' not defined"
+            | Some typeArgumentClass ->
+                let classExtends = typeArgumentClass.Superclass.ClassName
+
+                classExtendsCorrectClass classExtends shouldExtend classTable
+                |> Result.bind (fun _ ->
+                    let typeArguments = typeArgumentNvType.TypeArguments
+                    typeCheckNvTypeArguments typeArgumentClass typeArguments classDef classTable)
 
     match result with
-    | Ok _ -> Ok(typeParameter, classDef, classTable)
-    | Error error -> Error $"Error in type argument '{typeParameter.Name |> typeVariableNameString}': {error}"
-
-let typeCheckBoundsTypeArguments boundClass (state: TypeParameterState) =
-    let typeParameter, classDef, classTable = state
-    let typeArguments = typeParameter.Bound.TypeArguments
-
-    let folder (state: Result<TypeParameterState, string>) (typeArgument: Type) (typeParameter: TypeParameter) =
-        state
-        |> Result.bind (fun _ -> typeCheckTypeArgument (typeArgument, typeParameter, classDef, classTable))
-
-    boundHasRightAmountOfTypeArguments typeArguments boundClass
-    |> Result.bind (fun _ -> (Ok(state), typeArguments, boundClass.TypeParameters) |||> List.fold2 folder)
+    | Ok _ -> Ok()
+    | Error error -> Error $"Error in type argument '{typeArgument |> debugType}': {error}"
 
 let typeCheckBound (state: TypeParameterState) =
     let typeParameter, classDef, classTable = state
+    let typeArguments = typeParameter.Bound.TypeArguments
 
-    match classTable |> ClassTable.tryFind typeParameter.Bound.ClassName with
-    | None -> Error $"Bound '{typeParameter.Bound.ClassName |> classNameString}' is undefined"
-    | Some boundClass -> typeCheckBoundsTypeArguments boundClass state
+    let result =
+        match classTable |> ClassTable.tryFind typeParameter.Bound.ClassName with
+        | None -> Error "Bound is undefined"
+        | Some boundClass -> typeCheckNvTypeArguments boundClass typeArguments classDef classTable
 
-// TODO: Check that each nonvariable type argument is defined
-// TODO: Check that each nonvariable type argument either is or extends the correct class
+    match result with
+    | Ok _ -> Ok()
+    | Error error -> Error $"Error in bound '{typeParameter.Bound.ClassName |> classNameString}': {error}"
 
 let typeParameterNameIsUnique ((typeParameter, classDef, classTable): TypeParameterState) =
     let typeParameterNameMatch (otherTypeParameter: TypeParameter) =

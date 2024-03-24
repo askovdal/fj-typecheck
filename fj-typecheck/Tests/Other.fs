@@ -14,6 +14,12 @@ class B<X extends B<X, Y>, Y extends Object> extends Object {
         super();
     }
 }
+
+class C<X extends B<X, X>> extends B<X, X> {
+    C() {
+        super();
+    }
+}
 *)
 
 let classA =
@@ -23,7 +29,7 @@ let classA =
             Bound =
               { ClassName = ClassName "B"
                 TypeArguments =
-                  [ TypeVariable(TypeVariableName "Y")
+                  [ TypeVariable(TypeVariableName "X")
                     NonvariableType
                         { ClassName = ClassName "A"
                           TypeArguments = [ TypeVariable(TypeVariableName "X"); TypeVariable(TypeVariableName "Y") ] } ] } }
@@ -56,6 +62,20 @@ let classB =
       Superclass =
         { ClassName = ClassName "Object"
           TypeArguments = [] }
+      Fields = []
+      Constructor = { Parameters = [] }
+      Methods = [] }
+
+let classC =
+    { Name = ClassName "C"
+      TypeParameters =
+        [ { Name = TypeVariableName "X"
+            Bound =
+              { ClassName = ClassName "B"
+                TypeArguments = [ TypeVariable(TypeVariableName "X"); TypeVariable(TypeVariableName "X") ] } } ]
+      Superclass =
+        { ClassName = ClassName "B"
+          TypeArguments = [ TypeVariable(TypeVariableName "X"); TypeVariable(TypeVariableName "X") ] }
       Fields = []
       Constructor = { Parameters = [] }
       Methods = [] }

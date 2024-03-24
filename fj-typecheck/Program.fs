@@ -6,7 +6,7 @@ open TypeCheck.Main
 
 [<EntryPoint>]
 let main _argv =
-    let classTable = ClassTable.empty |> ClassTable.addClasses [ classA; classB ]
+    let classTable = ClassTable.empty |> ClassTable.addClasses [ classA; classB; classC ]
 
     match classTable |> typeCheckClassTable with
     | Ok _ ->
