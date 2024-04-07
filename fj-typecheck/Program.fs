@@ -1,7 +1,7 @@
 ﻿module Program
 
 open AST
-open Tests.Other
+open Tests.ContrivedExample
 open TypeCheck.Main
 
 [<EntryPoint>]

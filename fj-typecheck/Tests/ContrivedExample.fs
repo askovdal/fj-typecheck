@@ -1,4 +1,4 @@
-module Tests.Other
+module Tests.ContrivedExample
 
 open AST
 
