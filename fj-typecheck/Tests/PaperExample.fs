@@ -66,10 +66,12 @@ let pairZY =
     { ClassName = ClassName "Pair"
       TypeArguments = [ TypeVariable(TypeVariableName "Z"); TypeVariable(TypeVariableName "Y") ] }
 
+
 let setFst =
     { TypeParameters =
         [ { Name = TypeVariableName "Z"
-            Bound = objectType } ]
+            Bound = objectType
+            Variance = Invariant } ]
       ReturnType = NonvariableType pairZY
       Name = MethodName "setfst"
       Parameters =
@@ -88,9 +90,11 @@ let classPair =
     { Name = ClassName "Pair"
       TypeParameters =
         [ { Name = TypeVariableName "X"
-            Bound = objectType }
+            Bound = objectType
+            Variance = Invariant }
           { Name = TypeVariableName "Y"
-            Bound = objectType } ]
+            Bound = objectType
+            Variance = Invariant } ]
       Superclass = objectType
       Fields =
         [ { Type = TypeVariable(TypeVariableName "X")

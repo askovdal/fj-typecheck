@@ -14,9 +14,15 @@ and NonvariableType =
     { ClassName: ClassName
       TypeArguments: Type list }
 
+type Variance =
+    | Invariant
+    | Covariant
+    | Contravariant
+
 type TypeParameter =
     { Name: TypeVariableName
-      Bound: NonvariableType }
+      Bound: NonvariableType
+      Variance: Variance }
 
 type Field = { Type: Type; Name: FieldName }
 
