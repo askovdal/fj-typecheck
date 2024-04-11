@@ -1,8 +1,8 @@
 ﻿module Program
 
-open AST
 open Tests.ContrivedExample
-open TypeCheck.Main
+open TypeCheck.ClassTable
+open ClassTable
 
 [<EntryPoint>]
 let main _argv =

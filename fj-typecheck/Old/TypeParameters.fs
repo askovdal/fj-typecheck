@@ -2,6 +2,8 @@ module TypeCheck.TypeParameters
 
 open AST
 open TypeCheck.ClassFields
+open ClassTable
+open Utils
 
 type TypeParameterState = TypeParameter * Class * ClassTable
 
@@ -71,7 +73,7 @@ and typeCheckTypeArgument
     | Ok _ -> Ok()
     | Error error -> Error $"Error in type argument '{typeArgument |> debugType}': {error}"
 
-let typeCheckBound (state: TypeParameterState) =
+let boundOk (state: TypeParameterState) =
     let typeParameter, classDef, classTable = state
     let typeArguments = typeParameter.Bound.TypeArguments
 
@@ -96,20 +98,20 @@ let typeParameterNameIsUnique ((typeParameter, classDef, classTable): TypeParame
     | None -> Error "Type parameter is defined more than once"
     | Some _ -> Ok(typeParameter, classDef, classTable)
 
-let typeCheckTypeParameter ((typeParameter, classDef, classTable): TypeParameterState) =
+let typeCheckTypeParameter typeParameter ((classDef, classTable): State) () =
     let result =
         Ok(typeParameter, classDef, classTable)
         |> Result.bind typeParameterNameIsUnique
-        |> Result.bind typeCheckBound
+        |> Result.bind boundOk
 
     match result with
-    | Ok _ -> Ok(classDef, classTable)
+    | Ok _ -> Ok()
     | Error error -> Error $"Error in type parameter '{typeParameter.Name |> typeVariableNameString}': {error}"
 
 
 let typeCheckTypeParameters ((classDef, classTable): State) =
-    let folder (state: Result<State, string>) (typeParameter: TypeParameter) =
+    let folder (state: Result<unit, string>) (typeParameter: TypeParameter) =
         state
-        |> Result.bind (fun (classDef, classTable) -> typeCheckTypeParameter (typeParameter, classDef, classTable))
+        |> Result.bind (typeCheckTypeParameter typeParameter (classDef, classTable))
 
-    classDef.TypeParameters |> List.fold folder (Ok(classDef, classTable))
+    (Ok(), classDef.TypeParameters) ||> List.fold folder

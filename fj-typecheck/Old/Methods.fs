@@ -1,6 +1,7 @@
 module TypeCheck.Methods
 
 open AST
+open ClassTable
 
 type MethodState = Method * Class * ClassTable
 

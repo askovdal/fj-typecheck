@@ -20,9 +20,9 @@ type Variance =
     | Contravariant
 
 type TypeParameter =
-    { Name: TypeVariableName
-      Bound: NonvariableType
-      Variance: Variance }
+    { Variance: Variance
+      Name: TypeVariableName
+      Bound: NonvariableType }
 
 type Field = { Type: Type; Name: FieldName }
 
@@ -63,68 +63,3 @@ type Class =
       Fields: Field list
       Constructor: Constructor
       Methods: Method list }
-
-type ClassTable = Map<ClassName, Class>
-
-let isObject = (=) (ClassName "Object")
-
-module ClassTable =
-    let empty: ClassTable = Map.empty
-
-    let addClasses (classDefs: Class list) (classTable: ClassTable) =
-        let addClass (classTable: ClassTable) (classDef: Class) =
-            classTable |> Map.add classDef.Name classDef
-
-        (classTable, classDefs) ||> List.fold addClass
-
-    let containsClass (className: ClassName) (classTable: ClassTable) =
-        className |> isObject || classTable |> Map.containsKey className
-
-    let tryFind (className: ClassName) (classTable: ClassTable) : Class option =
-        if className |> isObject then
-            let objectClass =
-                { Name = ClassName "Object"
-                  TypeParameters = []
-                  Superclass =
-                    { ClassName = ClassName "Object"
-                      TypeArguments = [] }
-                  Fields = []
-                  Constructor = { Parameters = [] }
-                  Methods = [] }
-
-            Some objectClass
-        else
-            classTable |> Map.tryFind className
-
-type State = Class * ClassTable
-
-let classNameString (ClassName className) = className
-let typeVariableNameString (TypeVariableName typeVariableName) = typeVariableName
-let fieldNameString (FieldName fieldName) = fieldName
-let parameterNameString (ParameterName parameterName) = parameterName
-
-let parameterToField
-    ({ Type = typeDef
-       Name = ParameterName name }: Parameter)
-    : Field =
-    { Type = typeDef
-      Name = FieldName name }
-
-let fieldToParameter
-    ({ Type = typeDef
-       Name = FieldName name }: Field)
-    : Parameter =
-    { Type = typeDef
-      Name = ParameterName name }
-
-let rec debugType (typeDef: Type) =
-    match typeDef with
-    | TypeVariable(TypeVariableName name) -> name
-    | NonvariableType { ClassName = ClassName name
-                        TypeArguments = generics } ->
-        let genericsString = generics |> List.map debugType |> String.concat ", "
-
-        if genericsString = "" then
-            name
-        else
-            $"{name}<{genericsString}>"

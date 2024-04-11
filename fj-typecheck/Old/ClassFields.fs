@@ -1,6 +1,8 @@
 module TypeCheck.ClassFields
 
 open AST
+open ClassTable
+open Utils
 
 type FieldState = Field * Class * ClassTable
 

@@ -1,6 +1,8 @@
 module TypeCheck.Superclass
 
 open AST
+open ClassTable
+open Utils
 
 let superclassIsDefined ((classDef, classTable): State) =
     match classTable |> ClassTable.tryFind classDef.Superclass.ClassName with

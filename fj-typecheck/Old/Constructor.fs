@@ -1,6 +1,8 @@
 module TypeCheck.Constructor
 
 open AST
+open ClassTable
+open Utils
 
 let constructorHasAllFields (classDef, classTable) allFields =
     let constructorMissingParameter field =
