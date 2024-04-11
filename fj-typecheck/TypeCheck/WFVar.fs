@@ -3,9 +3,9 @@ module TypeCheck.WFVar
 open AST
 open Utils
 
-let wfVar // Δ ⊢ X ok
+let wfVar // 𝚫 ⊢ X ok
     (typeVariableName: TypeVariableName) // X
-    (typeEnv: TypeParameter list) // Δ
+    (typeEnv: TypeParameter list) // 𝚫
     =
     if
         typeEnv

@@ -5,10 +5,10 @@ open ClassTable
 open TypeCheck.WFVar
 open Utils
 
-let typeArgumentsWithinBounds // Δ ⊢ T̄ <: [T̄/X̄]N̄
+let typeArgumentsWithinBounds // 𝚫 ⊢ T̄ <: [T̄/X̄]N̄
     (typeArguments: Type list) // T̄
     (classDef: Class) // class C<X̄ ◁ N̄> ◁ N {...}
-    (typeEnv: TypeParameter list) // Δ
+    (typeEnv: TypeParameter list) // 𝚫
     (classTable: ClassTable)
     ()
     =
@@ -41,9 +41,9 @@ let typeArgumentsWithinBounds // Δ ⊢ T̄ <: [T̄/X̄]N̄
     (Ok(), typeArguments, classDef.TypeParameters) |||> List.fold2 folder
 
 
-let rec typeArgumentsOk // Δ ⊢ T̄ ok
+let rec typeArgumentsOk // 𝚫 ⊢ T̄ ok
     (typeArguments: Type list) // T̄
-    (typeEnv: TypeParameter list) // Δ
+    (typeEnv: TypeParameter list) // 𝚫
     (classTable: ClassTable)
     =
     let typeArgumentOk (typeArgument: Type) () =
@@ -61,7 +61,7 @@ let rec typeArgumentsOk // Δ ⊢ T̄ ok
 
 and wfClass
     (nvType: NonvariableType) // C<T̄>
-    (typeEnv: TypeParameter list) // Δ
+    (typeEnv: TypeParameter list) // 𝚫
     (classTable: ClassTable)
     =
     match classTable |> ClassTable.tryFind nvType.ClassName with
