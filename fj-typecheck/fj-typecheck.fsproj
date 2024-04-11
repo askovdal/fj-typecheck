@@ -15,11 +15,6 @@
         <Compile Include="TypeCheck\ClassTable.fs" />
         <Compile Include="Tests\PaperExample.fs" />
         <Compile Include="Tests\ContrivedExample.fs" />
-        <Compile Include="Old\Superclass.fs" />
-        <Compile Include="Old\ClassFields.fs" />
-        <Compile Include="Old\TypeParameters.fs" />
-        <Compile Include="Old\Constructor.fs" />
-        <Compile Include="Old\Methods.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 
