@@ -3,13 +3,13 @@ module Tests.ContrivedExample
 open AST
 
 (*
-class A<X extends B<X, A<X, Y>>, Y extends Object> extends B<A<X, Y>, Y> {
+class A<T extends B<U, A<T, U>>, U extends Object> extends B<A<T, U>, U> {
     A() {
         super();
     }
 }
 
-class B<X extends B<X, Y>, Y extends Object> extends Object {
+class B<V extends B<V, W>, W extends Object> extends Object {
     B() {
         super();
     }
@@ -25,16 +25,16 @@ class C<X extends B<X, X>> extends B<X, X> {
 let classA =
     { Name = ClassName "A"
       TypeParameters =
-        [ { Name = TypeVariableName "X"
+        [ { Name = TypeVariableName "T"
             Bound =
               { ClassName = ClassName "B"
                 TypeArguments =
-                  [ TypeVariable(TypeVariableName "X")
+                  [ TypeVariable(TypeVariableName "U")
                     NonvariableType
                         { ClassName = ClassName "A"
-                          TypeArguments = [ TypeVariable(TypeVariableName "X"); TypeVariable(TypeVariableName "Y") ] } ] }
+                          TypeArguments = [ TypeVariable(TypeVariableName "T"); TypeVariable(TypeVariableName "U") ] } ] }
             Variance = Invariant }
-          { Name = TypeVariableName "Y"
+          { Name = TypeVariableName "U"
             Bound =
               { ClassName = ClassName "Object"
                 TypeArguments = [] }
@@ -44,8 +44,8 @@ let classA =
           TypeArguments =
             [ NonvariableType
                   { ClassName = ClassName "A"
-                    TypeArguments = [ TypeVariable(TypeVariableName "X"); TypeVariable(TypeVariableName "Y") ] }
-              TypeVariable(TypeVariableName "Y") ] }
+                    TypeArguments = [ TypeVariable(TypeVariableName "T"); TypeVariable(TypeVariableName "U") ] }
+              TypeVariable(TypeVariableName "U") ] }
       Fields = []
       Constructor = { Parameters = [] }
       Methods = [] }
@@ -53,12 +53,12 @@ let classA =
 let classB =
     { Name = ClassName "B"
       TypeParameters =
-        [ { Name = TypeVariableName "X"
+        [ { Name = TypeVariableName "V"
             Bound =
               { ClassName = ClassName "B"
-                TypeArguments = [ TypeVariable(TypeVariableName "X"); TypeVariable(TypeVariableName "Y") ] }
+                TypeArguments = [ TypeVariable(TypeVariableName "V"); TypeVariable(TypeVariableName "W") ] }
             Variance = Invariant }
-          { Name = TypeVariableName "Y"
+          { Name = TypeVariableName "W"
             Bound =
               { ClassName = ClassName "Object"
                 TypeArguments = [] }

@@ -5,7 +5,10 @@ open ClassTable
 open TypeCheck.WFClass
 open Utils
 
-let boundsOk (typeParameters: TypeParameter list) (classTable: ClassTable) =
+let boundsOk // X̄ <: N̄ ⊢ N̄ ok
+    (typeParameters: TypeParameter list) // X̄ <: N̄
+    (classTable: ClassTable)
+    =
     let boundOk (typeParameter: TypeParameter) () =
         wfClass typeParameter.Bound typeParameters classTable
         |> prefixError $"Error in bound '{NonvariableType(typeParameter.Bound) |> debugType}':"
