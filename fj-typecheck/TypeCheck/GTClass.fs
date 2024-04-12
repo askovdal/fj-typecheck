@@ -11,7 +11,7 @@ let boundsOk // X̄ <: N̄ ⊢ N̄ ok
     =
     let boundOk (typeParameter: TypeParameter) () =
         wfClass typeParameter.Bound typeParameters classTable
-        |> prefixError $"Error in bound '{NonvariableType(typeParameter.Bound) |> debugType}':"
+        |> prefixError $"Error in bound '{typeParameter.Bound |> debugNvType}':"
 
     let folder (state: Result<unit, string>) (typeParameter: TypeParameter) =
         state |> Result.bind (boundOk typeParameter)

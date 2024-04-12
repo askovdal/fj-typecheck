@@ -9,6 +9,7 @@
         <Compile Include="AST.fs" />
         <Compile Include="Utils.fs" />
         <Compile Include="ClassTable.fs" />
+        <Compile Include="TypeCheck\STrans.fs" />
         <Compile Include="TypeCheck\WFVar.fs" />
         <Compile Include="TypeCheck\WFClass.fs" />
         <Compile Include="TypeCheck\GTClass.fs" />

@@ -3,7 +3,7 @@ module Tests.ContrivedExample
 open AST
 
 (*
-class A<T extends B<U, A<T, U>>, U extends Object> extends B<A<T, U>, U> {
+class A<T extends B<T, A<T, U>>, U extends Object> extends B<A<T, U>, U> {
     A() {
         super();
     }
@@ -15,8 +15,14 @@ class B<V extends B<V, W>, W extends Object> extends Object {
     }
 }
 
-class C<X extends B<X, X>> extends B<X, X> {
+class C<X extends D<X, X>> extends B<X, X> {
     C() {
+        super();
+    }
+}
+
+class D<Y extends Object, Z extends B<Z, Y>> extends B<Z, Y> {
+    D() {
         super();
     }
 }
@@ -29,7 +35,7 @@ let classA =
             Bound =
               { ClassName = ClassName "B"
                 TypeArguments =
-                  [ TypeVariable(TypeVariableName "U")
+                  [ TypeVariable(TypeVariableName "T")
                     NonvariableType
                         { ClassName = ClassName "A"
                           TypeArguments = [ TypeVariable(TypeVariableName "T"); TypeVariable(TypeVariableName "U") ] } ] }
@@ -75,12 +81,32 @@ let classC =
       TypeParameters =
         [ { Name = TypeVariableName "X"
             Bound =
-              { ClassName = ClassName "B"
+              { ClassName = ClassName "D"
                 TypeArguments = [ TypeVariable(TypeVariableName "X"); TypeVariable(TypeVariableName "X") ] }
             Variance = Invariant } ]
       Superclass =
         { ClassName = ClassName "B"
           TypeArguments = [ TypeVariable(TypeVariableName "X"); TypeVariable(TypeVariableName "X") ] }
+      Fields = []
+      Constructor = { Parameters = [] }
+      Methods = [] }
+
+let classD =
+    { Name = ClassName "D"
+      TypeParameters =
+        [ { Name = TypeVariableName "Y"
+            Bound =
+              { ClassName = ClassName "Object"
+                TypeArguments = [] }
+            Variance = Invariant }
+          { Name = TypeVariableName "Z"
+            Bound =
+              { ClassName = ClassName "B"
+                TypeArguments = [ TypeVariable(TypeVariableName "Z"); TypeVariable(TypeVariableName "Y") ] }
+            Variance = Invariant } ]
+      Superclass =
+        { ClassName = ClassName "B"
+          TypeArguments = [ TypeVariable(TypeVariableName "Z"); TypeVariable(TypeVariableName "Y") ] }
       Fields = []
       Constructor = { Parameters = [] }
       Methods = [] }
