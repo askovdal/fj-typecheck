@@ -60,7 +60,6 @@ and debugType (typeDef: Type) =
 let prefixError prefixMsg =
     Result.mapError (fun errorValue -> $"{prefixMsg} {errorValue}")
 
-
 let rec substituteTypeArgsForVars
     (typeArguments: Type list) // T̄
     (typeParameters: TypeParameter list) // X̄

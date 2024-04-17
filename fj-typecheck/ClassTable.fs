@@ -19,7 +19,7 @@ module ClassTable =
     let containsClass (className: ClassName) (classTable: ClassTable) =
         className |> isObject || classTable |> Map.containsKey className
 
-    let tryFind (className: ClassName) (classTable: ClassTable) : Class option =
+    let tryFind (className: ClassName) (classTable: ClassTable) =
         if className |> isObject then
             let objectClass =
                 { Name = ClassName "Object"
@@ -34,3 +34,6 @@ module ClassTable =
             Some objectClass
         else
             classTable |> Map.tryFind className
+
+    let find (className: ClassName) (classTable: ClassTable) =
+        classTable |> tryFind className |> optionOkOr $"Class '{className}' not defined"
