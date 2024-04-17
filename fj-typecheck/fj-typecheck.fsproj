@@ -16,8 +16,8 @@
         <Compile Include="TypeCheck\WFClass.fs" />
         <Compile Include="TypeCheck\GTClass.fs" />
         <Compile Include="TypeCheck\ClassTable.fs" />
-        <Compile Include="Tests\PaperExample.fs" />
-        <Compile Include="Tests\ContrivedExample.fs" />
+        <Compile Include="Examples\PaperExample.fs" />
+        <Compile Include="Examples\ContrivedExample.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

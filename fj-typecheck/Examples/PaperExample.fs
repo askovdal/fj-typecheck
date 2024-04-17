@@ -1,4 +1,4 @@
-module Tests.PaperExample
+module Examples.PaperExample
 
 open AST
 

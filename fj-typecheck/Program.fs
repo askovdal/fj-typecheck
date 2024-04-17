@@ -1,6 +1,6 @@
 ﻿module Program
 
-open Tests.ContrivedExample
+open Examples.ContrivedExample
 open TypeCheck.ClassTable
 open ClassTable
 
