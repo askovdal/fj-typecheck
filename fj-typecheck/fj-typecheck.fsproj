@@ -9,6 +9,7 @@
         <Compile Include="AST.fs" />
         <Compile Include="Utils.fs" />
         <Compile Include="ClassTable.fs" />
+        <Compile Include="TypeCheck\SRefl.fs" />
         <Compile Include="TypeCheck\SVar.fs" />
         <Compile Include="TypeCheck\SClass.fs" />
         <Compile Include="TypeCheck\STrans.fs" />
@@ -18,6 +19,7 @@
         <Compile Include="TypeCheck\ClassTable.fs" />
         <Compile Include="Examples\PaperExample.fs" />
         <Compile Include="Examples\ContrivedExample.fs" />
+        <Compile Include="Examples\VarianceExample.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

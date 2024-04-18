@@ -4,6 +4,7 @@ open AST
 open ClassTable
 open TypeCheck.WFVar
 open TypeCheck.SClass
+open TypeCheck.SRefl
 open TypeCheck.SVar
 open Utils
 open STrans
@@ -27,8 +28,11 @@ let typeArgumentsRespectBounds // 𝚫 ⊢ T̄ <: [T̄/X̄]N̄
                 (match typeArgument with
                  // If T is X, check if S-Var is applicable
                  | TypeVariable typeArgumentVariableName -> sVar typeArgumentVariableName substitutedBound typeEnv
-                 // If T is C<T̄>, check if S-Class is applicable
-                 | NonvariableType nonvariableType -> sClass nonvariableType substitutedBound classTable)
+                 // If T is C<T̄>, check if S-Refl or S-Class is applicable
+                 | NonvariableType nonvariableType ->
+                     match sRefl nonvariableType substitutedBound with
+                     | Ok() -> Ok()
+                     | Error _ -> sClass nonvariableType substitutedBound classTable)
             with
             | Ok() -> Ok()
             | Error _ ->
