@@ -20,6 +20,7 @@
         <Compile Include="Examples\PaperExample.fs" />
         <Compile Include="Examples\ContrivedExample.fs" />
         <Compile Include="Examples\VarianceExample.fs" />
+        <Compile Include="Examples\UndecidabilityExamples.fs" />
         <Compile Include="Program.fs" />
     </ItemGroup>
 

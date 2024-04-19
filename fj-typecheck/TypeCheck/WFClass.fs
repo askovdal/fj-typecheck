@@ -24,23 +24,22 @@ let typeArgumentsRespectBounds // 𝚫 ⊢ T̄ <: [T̄/X̄]N̄
         bound
         |> substituteInNvType typeArguments classDef.TypeParameters // [T̄/X̄]N
         |> Result.bind (fun substitutedBound ->
-            match
-                (match typeArgument with
-                 // If T is X, check if S-Var is applicable
-                 | TypeVariable typeArgumentVariableName -> sVar typeArgumentVariableName substitutedBound typeEnv
-                 // If T is C<T̄>, check if S-Refl or S-Class is applicable
-                 | NonvariableType nonvariableType ->
-                     match sRefl nonvariableType substitutedBound with
-                     | Ok() -> Ok()
-                     | Error _ -> sClass nonvariableType substitutedBound classTable)
-            with
-            | Ok() -> Ok()
-            | Error _ ->
-                sTrans typeArgument substitutedBound typeEnv classTable
-                |> Result.bind (
-                    optionOkOr
-                        $"Type argument '{typeArgument |> debugType}' does not respect its bound; should extend '{substitutedBound |> debugNvType}'"
-                ))
+            checkSubTypeRelation typeArgument (NonvariableType substitutedBound) typeEnv classTable
+            |> prefixError
+                $"Type argument '{typeArgument |> debugType}' does not respect its bound; should extend '{substitutedBound |> debugNvType}':"
+
+        // sRefl typeArgument (NonvariableType substitutedBound)
+        // |> okOr (fun _ ->
+        //     match typeArgument with
+        //     // If T is X, check if S-Var is applicable
+        //     | TypeVariable typeArgumentVariableName -> sVar typeArgumentVariableName substitutedBound typeEnv
+        //     // If T is C<T̄>, check if S-Class is applicable
+        //     | NonvariableType nonvariableType -> sClass nonvariableType substitutedBound classTable
+        //     |> okOr (sTrans typeArgument substitutedBound typeEnv classTable)
+        //     |> prefixError
+        //         $"Type argument '{typeArgument |> debugType}' does not respect its bound; should extend '{substitutedBound |> debugNvType}':")
+
+        )
 
     let folder (state: Result<unit, string>) (typeArgument: Type) (typeParameter: TypeParameter) =
         state

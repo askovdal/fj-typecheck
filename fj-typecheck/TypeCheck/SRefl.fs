@@ -3,10 +3,10 @@ module TypeCheck.SRefl
 open AST
 
 let sRefl // 𝚫 ⊢ T <: T
-    (nvType: NonvariableType) // T
-    (bound: NonvariableType)
+    (typeDef: Type) // T
+    (bound: Type)
     =
-    if nvType = bound then
+    if typeDef = bound then
         Ok()
     else
-        Error "S-Refl doesn't hold"
+        Error "S-Refl does not hold"

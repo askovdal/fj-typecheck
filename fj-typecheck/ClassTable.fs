@@ -36,4 +36,4 @@ module ClassTable =
             classTable |> Map.tryFind className
 
     let find (className: ClassName) (classTable: ClassTable) =
-        classTable |> tryFind className |> optionOkOr $"Class '{className}' not defined"
+        classTable |> tryFind className |> optionOkOr $"Class '{className |> classNameString}' not defined"

@@ -18,4 +18,4 @@ let sClass // 𝚫 ⊢ C<T̄> <: [T̄/X̄]N
             if substitutedSuperclass = substitutedBound then
                 Ok()
             else
-                Error "S-Class doesn't hold"))
+                Error "S-Class does not hold"))

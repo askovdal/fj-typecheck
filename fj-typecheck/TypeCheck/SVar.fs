@@ -14,4 +14,4 @@ let sVar // 𝚫 ⊢ X <: 𝚫(X)
         if typeVariableDef.Bound = bound then
             Ok()
         else
-            Error "S-Var doesn't hold"
+            Error "S-Var does not hold"

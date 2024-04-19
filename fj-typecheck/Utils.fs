@@ -96,3 +96,8 @@ let substituteInNvType // [T̄/X̄]N
             $"Unexpected error when substituting in '{bound |> debugNvType}': received type variable '{typeVariableName |> typeVariableNameString}'"
 
     | Ok(NonvariableType substitutedSuperclass) -> Ok substitutedSuperclass
+
+let okOr op =
+    function
+    | Ok resultValue -> Ok resultValue
+    | Error _ -> op ()
