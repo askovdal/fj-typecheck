@@ -18,24 +18,25 @@ let tryFindTypeBound (typeDef: Type) (typeEnv: TypeParameter list) (classTable: 
     | NonvariableType nonvariableType ->
         classTable
         |> ClassTable.find nonvariableType.ClassName
-        |> Result.map (_.Superclass)
+        |> Result.bind (fun nvTypeClassDef ->
+            nvTypeClassDef.Superclass
+            |> substituteInNvType nonvariableType.TypeArguments nvTypeClassDef.TypeParameters)
 
 let rec sTrans // 𝚫 ⊢ S <: U
     (subType: Type) // S
     (superType: NonvariableType) // U (nvType because bounds cannot be type variables)
     (typeEnv: TypeParameter list) // 𝚫
     (classTable: ClassTable)
-    ()
     =
     tryFindTypeBound subType typeEnv classTable
     |> Result.bind (fun bound -> // T
-        // Check if 𝚫 ⊢ T <: U holds using S-Class
-        sClass bound superType classTable
-        |> okOr (fun _ ->
-            if bound.ClassName = superType.ClassName then // TODO: Check if the bound should be substituted here
-                // Check if Variance rule holds
-                variance bound superType typeEnv classTable
-            else
+        // If T is C<T̄> and U is C<Ū>, check if Variance rule holds
+        if bound.ClassName = superType.ClassName then
+            variance bound superType typeEnv classTable
+        else
+            // Check if 𝚫 ⊢ T <: U holds using S-Class
+            sClass bound superType classTable
+            |> orElse (fun _ ->
                 classTable
                 |> ClassTable.find bound.ClassName
                 |> Result.bind (fun boundClassDef ->
@@ -44,7 +45,7 @@ let rec sTrans // 𝚫 ⊢ S <: U
                         Error "S-Trans does not hold"
                     else
                         // Check if 𝚫 ⊢ T <: U holds using S-Trans
-                        sTrans (NonvariableType bound) superType typeEnv classTable ())))
+                        sTrans (NonvariableType bound) superType typeEnv classTable)))
 
 and variance // 𝚫 ⊢ C<T̄> <: C<Ū>
     (subType: NonvariableType) // C<T̄>
@@ -58,20 +59,18 @@ and variance // 𝚫 ⊢ C<T̄> <: C<Ū>
         (var: Variance) // var(C#i)
         ()
         =
-        sRefl subTypeArgument superTypeArgument
-        |> okOr (fun _ ->
-            match var with
-            | Invariant ->
-                sRefl subTypeArgument superTypeArgument // 𝚫 ⊢ Ti = Ui
-                |> prefixError $"Error in '{subTypeArgument |> debugType}' <:₀ '{superTypeArgument |> debugType}':"
+        match var with
+        | Invariant ->
+            sRefl subTypeArgument superTypeArgument // 𝚫 ⊢ Ti = Ui
+            |> prefixError $"Error in '{subTypeArgument |> debugType}' <:₀ '{superTypeArgument |> debugType}':"
 
-            | Covariant ->
-                checkSubTypeRelation subTypeArgument superTypeArgument typeEnv classTable // 𝚫 ⊢ Ti <: Ui
-                |> prefixError $"Error in '{subTypeArgument |> debugType}' <:₊ '{superTypeArgument |> debugType}':"
+        | Covariant ->
+            checkSubTypeRelation subTypeArgument superTypeArgument typeEnv classTable // 𝚫 ⊢ Ti <: Ui
+            |> prefixError $"Error in '{subTypeArgument |> debugType}' <:₊ '{superTypeArgument |> debugType}':"
 
-            | Contravariant ->
-                checkSubTypeRelation superTypeArgument subTypeArgument typeEnv classTable
-                |> prefixError $"Error in '{subTypeArgument |> debugType}' <:₋ '{superTypeArgument |> debugType}':") // 𝚫 ⊢ Ui <: Ti
+        | Contravariant ->
+            checkSubTypeRelation superTypeArgument subTypeArgument typeEnv classTable // 𝚫 ⊢ Ui <: Ti
+            |> prefixError $"Error in '{subTypeArgument |> debugType}' <:₋ '{superTypeArgument |> debugType}':"
 
     let folder
         (state: Result<unit, string>)
@@ -96,14 +95,23 @@ and checkSubTypeRelation // 𝚫 ⊢ T <: U
     =
     // First, check if S-Refl holds
     sRefl subType superType
-    |> okOr (fun _ ->
+    |> orElse (fun _ ->
         match superType with
         | TypeVariable _ -> Error "Bounds cannot be type variables"
         | NonvariableType superNvType ->
             match subType with
             // If T is X, check if S-Var holds
             | TypeVariable subTypeVariable -> sVar subTypeVariable superNvType typeEnv
-            // If T is C<T̄>, check if S-Class holds
-            | NonvariableType subNvType -> sClass subNvType superNvType classTable
+
+            // If T is C<T̄>...
+            | NonvariableType subNvType ->
+                // ...and U is C<Ū>...
+                if subNvType.ClassName = superNvType.ClassName then
+                    // ...check if Variance rule holds.
+                    variance subNvType superNvType typeEnv classTable
+                else
+                    // Else, check if S-Class holds
+                    sClass subNvType superNvType classTable
+
             // Lastly, check if S-Trans holds
-            |> okOr (sTrans subType superNvType typeEnv classTable))
+            |> orElse (fun _ -> sTrans subType superNvType typeEnv classTable))

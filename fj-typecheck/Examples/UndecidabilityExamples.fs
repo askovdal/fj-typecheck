@@ -3,14 +3,18 @@ module Examples.UndecidabilityExamples
 open AST
 
 (*
+----------
+Example 1:
+----------
 class N<-Z extends Object> extends Object {}
 
 class C extends N<N<C> {}
 
 class Tester<X extends N<C>, Y extends Tester<C, Y>> extends Object {}
 
-----
-
+----------
+Example 2:
+----------
 class N<-Z extends Object> extends Object {}
 
 class C<X extends Object> extends N<N<C<C<X>>>> {}

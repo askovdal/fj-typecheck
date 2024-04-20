@@ -2,24 +2,6 @@ module Utils
 
 open AST
 
-/// Transforms an Option<'T> into a Result<'T, 'TError>, mapping Some(v) to Ok(v) and None to Error(err).
-let optionOkOr errorValue =
-    function
-    | Some value -> Ok value
-    | None -> Error errorValue
-
-/// Transforms a Result<'T, 'TError> list into a Result<'T list, 'TError>.
-/// If every element in `results` is Ok(v), returns the list of values.
-/// If one element in `results` is Error(err), returns the error.
-let collectResults results =
-    let rec collector acc =
-        function
-        | [] -> Ok(List.rev acc)
-        | Ok v :: rest -> collector (v :: acc) rest
-        | Error err :: _ -> Error err
-
-    collector [] results
-
 let isObject = (=) (ClassName "Object")
 
 let classNameString (ClassName className) = className
@@ -59,6 +41,18 @@ and debugType (typeDef: Type) =
 
 let prefixError prefixMsg =
     Result.mapError (fun errorValue -> $"{prefixMsg} {errorValue}")
+    
+/// Transforms a Result<'T, 'TError> list into a Result<'T list, 'TError>.
+/// If every element in `results` is Ok(v), returns the list of values.
+/// If one element in `results` is Error(err), returns the error.
+let collectResults results =
+    let rec collector acc =
+        function
+        | [] -> Ok(List.rev acc)
+        | Ok v :: rest -> collector (v :: acc) rest
+        | Error err :: _ -> Error err
+
+    collector [] results
 
 let rec substituteTypeArgsForVars
     (typeArguments: Type list) // T̄
@@ -97,7 +91,14 @@ let substituteInNvType // [T̄/X̄]N
 
     | Ok(NonvariableType substitutedSuperclass) -> Ok substitutedSuperclass
 
-let okOr op =
+/// Calls `op` if the result is Error, otherwise returns the Ok value.
+let orElse op =
     function
     | Ok resultValue -> Ok resultValue
     | Error _ -> op ()
+
+/// Transforms an Option<'T> into a Result<'T, 'TError>, mapping Some(v) to Ok(v) and None to Error(errorValue).
+let okOr errorValue =
+    function
+    | Some value -> Ok value
+    | None -> Error errorValue
