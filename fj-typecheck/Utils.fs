@@ -2,7 +2,11 @@ module Utils
 
 open AST
 
-let isObject = (=) (ClassName "Object")
+let objectType =
+    { ClassName = ClassName "Object"
+      TypeArguments = [] }
+
+let isObject = (=) objectType
 
 let classNameString (ClassName className) = className
 let typeVariableNameString (TypeVariableName typeVariableName) = typeVariableName
@@ -41,7 +45,7 @@ and debugType (typeDef: Type) =
 
 let prefixError prefixMsg =
     Result.mapError (fun errorValue -> $"{prefixMsg} {errorValue}")
-    
+
 /// Transforms a Result<'T, 'TError> list into a Result<'T list, 'TError>.
 /// If every element in `results` is Ok(v), returns the list of values.
 /// If one element in `results` is Error(err), returns the error.

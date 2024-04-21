@@ -2,6 +2,7 @@ module TypeCheck.GTClass
 
 open AST
 open ClassTable
+open TypeCheck.WFObject
 open TypeCheck.WFClass
 open Utils
 
@@ -11,15 +12,20 @@ let superclassOk // X̄ <: N̄ ⊢ N ok
     (classTable: ClassTable)
     ()
     =
-    wfClass superclass typeParameters classTable
+    wfObject superclass
+    |> orElse (wfClass superclass typeParameters classTable)
     |> prefixError $"Error in superclass '{superclass |> debugNvType}':"
 
 let boundsOk // X̄ <: N̄ ⊢ N̄ ok
     (typeParameters: TypeParameter list) // X̄ <: N̄
     (classTable: ClassTable)
     =
-    let boundOk (typeParameter: TypeParameter) () =
-        wfClass typeParameter.Bound typeParameters classTable
+    let boundOk // X̄ <: N̄ ⊢ N ok
+        (typeParameter: TypeParameter) // N
+        ()
+        =
+        wfObject typeParameter.Bound
+        |> orElse (wfClass typeParameter.Bound typeParameters classTable)
         |> prefixError $"Error in bound '{typeParameter.Bound |> debugNvType}':"
 
     let folder (state: Result<unit, string>) (typeParameter: TypeParameter) =

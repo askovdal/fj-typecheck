@@ -16,24 +16,8 @@ module ClassTable =
 
         (classTable, classDefs) ||> List.fold addClass
 
-    let containsClass (className: ClassName) (classTable: ClassTable) =
-        className |> isObject || classTable |> Map.containsKey className
-
     let tryFind (className: ClassName) (classTable: ClassTable) =
-        if className |> isObject then
-            let objectClass =
-                { Name = ClassName "Object"
-                  TypeParameters = []
-                  Superclass =
-                    { ClassName = ClassName "Object"
-                      TypeArguments = [] }
-                  Fields = []
-                  Constructor = { Parameters = [] }
-                  Methods = [] }
-
-            Some objectClass
-        else
-            classTable |> Map.tryFind className
+        classTable |> Map.tryFind className
 
     let find (className: ClassName) (classTable: ClassTable) =
         classTable |> tryFind className |> okOr $"Class '{className |> classNameString}' not defined"
