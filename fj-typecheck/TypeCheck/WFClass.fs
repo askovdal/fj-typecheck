@@ -5,7 +5,7 @@ open ClassTable
 open TypeCheck.WFVar
 open TypeCheck.WFObject
 open Utils
-open STrans
+open SubtypeAssertion
 
 let typeArgumentsRespectBounds // 𝚫 ⊢ T̄ <: [T̄/X̄]N̄
     (typeArguments: Type list) // T̄
@@ -22,7 +22,7 @@ let typeArgumentsRespectBounds // 𝚫 ⊢ T̄ <: [T̄/X̄]N̄
         bound
         |> substituteInNvType typeArguments classDef.TypeParameters // [T̄/X̄]N
         |> Result.bind (fun substitutedBound ->
-            checkSubTypeRelation typeArgument (NonvariableType substitutedBound) typeEnv classTable
+            subtypeAssertion typeArgument (NonvariableType substitutedBound) typeEnv classTable
             |> prefixError
                 $"Type argument '{typeArgument |> debugType}' does not respect its bound; should extend '{substitutedBound |> debugNvType}':")
 
