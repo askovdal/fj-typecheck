@@ -3,8 +3,8 @@
 open ClassTable
 open TypeCheck.ClassTable
 open Examples.ContrivedExample
-// open Examples.VarianceExample
-open Examples.UndecidabilityExamples.Example3
+open Examples.VarianceExample
+open Examples.UndecidabilityExamples.Example2
 
 [<EntryPoint>]
 let main _argv =

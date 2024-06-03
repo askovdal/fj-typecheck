@@ -4,8 +4,13 @@ open AST
 open Utils
 
 type ClassTable = Map<ClassName, Class>
+type TypeEnv = TypeParameter list
+type Expansive = bool
 
-type State = Class * ClassTable
+type State = TypeEnv * ClassTable * Expansive
+
+type SubtypeAssertion = Type * Type
+type Visited = SubtypeAssertion list
 
 module ClassTable =
     let empty: ClassTable = Map.empty
@@ -16,8 +21,9 @@ module ClassTable =
 
         (classTable, classDefs) ||> List.fold addClass
 
-    let tryFind (className: ClassName) (classTable: ClassTable) =
-        classTable |> Map.tryFind className
+    let tryFind (className: ClassName) (classTable: ClassTable) = classTable |> Map.tryFind className
 
     let find (className: ClassName) (classTable: ClassTable) =
-        classTable |> tryFind className |> okOr $"Class '{className |> classNameString}' not defined"
+        classTable
+        |> tryFind className
+        |> okOr $"Class '{className |> classNameString}' not defined"

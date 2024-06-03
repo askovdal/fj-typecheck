@@ -8,24 +8,24 @@ open Utils
 
 let superclassOk // X̄ <: N̄ ⊢ N ok
     (superclass: NonvariableType) // N
-    (typeParameters: TypeParameter list) // X̄ <: N̄
-    (classTable: ClassTable)
+    (state: State)
     ()
     =
     wfObject superclass
-    |> orElse (wfClass superclass typeParameters classTable)
+    |> orElse (wfClass superclass state)
     |> prefixError $"Error in superclass '{superclass |> debugNvType}':"
 
 let boundsOk // X̄ <: N̄ ⊢ N̄ ok
-    (typeParameters: TypeParameter list) // X̄ <: N̄
-    (classTable: ClassTable)
+    (state: State)
     =
+    let typeParameters, _, _ = state
+
     let boundOk // X̄ <: N̄ ⊢ N ok
         (typeParameter: TypeParameter) // N
         ()
         =
         wfObject typeParameter.Bound
-        |> orElse (wfClass typeParameter.Bound typeParameters classTable)
+        |> orElse (wfClass typeParameter.Bound state)
         |> prefixError $"Error in bound '{typeParameter.Bound |> debugNvType}':"
 
     let folder (state: Result<unit, string>) (typeParameter: TypeParameter) =
@@ -33,9 +33,8 @@ let boundsOk // X̄ <: N̄ ⊢ N̄ ok
 
     (Ok(), typeParameters) ||> List.fold folder
 
-let gtClass (classDef: Class) (classTable: ClassTable) () =
-    let result =
-        boundsOk classDef.TypeParameters classTable
-        |> Result.bind (superclassOk classDef.Superclass classDef.TypeParameters classTable)
+let gtClass (classDef: Class) (classTable: ClassTable) (expansive: bool) () =
+    let state = (classDef.TypeParameters, classTable, expansive)
+    let result = boundsOk state |> Result.bind (superclassOk classDef.Superclass state)
 
     result |> prefixError $"Error in class '{classDef.Name |> classNameString}':"

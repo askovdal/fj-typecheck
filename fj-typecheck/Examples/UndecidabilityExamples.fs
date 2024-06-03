@@ -36,17 +36,13 @@ Example 3 (exponential):
 ----------
 class N<-Z extends Object> extends Object {}
 
-class C0<X extends Object> extends N<N<X>> {}
-
-class C1<X extends Object> extends C0<C0<X>> {}
-class C2<X extends Object> extends C1<C1<X>> {}
-class C3<X extends Object> extends C2<C2<X>> {}
-class C4<X extends Object> extends C3<C3<X>> {}
-class C5<X extends Object> extends C4<C4<X>> {}
+class C0<X extends Object> extends N<N<X>>> {}
+class C1<Y extends Object> extends C0<C0<Y>> {}
+class C2<W extends Object> extends C1<C1<W>> {}
 
 class T extends Object {}
 
-class Tester<X extends N<C5<T>>, Y extends Tester<C5<N<T>>, Y>> extends Object {}
+class Tester<X extends N<C2<T>>, Y extends Tester<C2<N<T>>, Y>> extends Object {}
 *)
 
 module Example1 =
@@ -244,7 +240,7 @@ module Example3 =
         { Name = ClassName "C1"
           TypeParameters =
             [ { Variance = Invariant
-                Name = TypeVariableName "X"
+                Name = TypeVariableName "Y"
                 Bound =
                   { ClassName = ClassName "Object"
                     TypeArguments = [] } } ]
@@ -253,7 +249,7 @@ module Example3 =
               TypeArguments =
                 [ NonvariableType
                       { ClassName = ClassName "C0"
-                        TypeArguments = [ TypeVariable(TypeVariableName "X") ] } ] }
+                        TypeArguments = [ TypeVariable(TypeVariableName "Y") ] } ] }
           Fields = []
           Constructor = { Parameters = [] }
           Methods = [] }
@@ -262,7 +258,7 @@ module Example3 =
         { Name = ClassName "C2"
           TypeParameters =
             [ { Variance = Invariant
-                Name = TypeVariableName "X"
+                Name = TypeVariableName "W"
                 Bound =
                   { ClassName = ClassName "Object"
                     TypeArguments = [] } } ]
@@ -271,61 +267,7 @@ module Example3 =
               TypeArguments =
                 [ NonvariableType
                       { ClassName = ClassName "C1"
-                        TypeArguments = [ TypeVariable(TypeVariableName "X") ] } ] }
-          Fields = []
-          Constructor = { Parameters = [] }
-          Methods = [] }
-
-    let classC3 =
-        { Name = ClassName "C3"
-          TypeParameters =
-            [ { Variance = Invariant
-                Name = TypeVariableName "X"
-                Bound =
-                  { ClassName = ClassName "Object"
-                    TypeArguments = [] } } ]
-          Superclass =
-            { ClassName = ClassName "C2"
-              TypeArguments =
-                [ NonvariableType
-                      { ClassName = ClassName "C2"
-                        TypeArguments = [ TypeVariable(TypeVariableName "X") ] } ] }
-          Fields = []
-          Constructor = { Parameters = [] }
-          Methods = [] }
-
-    let classC4 =
-        { Name = ClassName "C4"
-          TypeParameters =
-            [ { Variance = Invariant
-                Name = TypeVariableName "X"
-                Bound =
-                  { ClassName = ClassName "Object"
-                    TypeArguments = [] } } ]
-          Superclass =
-            { ClassName = ClassName "C3"
-              TypeArguments =
-                [ NonvariableType
-                      { ClassName = ClassName "C3"
-                        TypeArguments = [ TypeVariable(TypeVariableName "X") ] } ] }
-          Fields = []
-          Constructor = { Parameters = [] }
-          Methods = [] }
-
-    let classC5 =
-        { Name = ClassName "C5"
-          TypeParameters =
-            [ { Variance = Invariant
-                Name = TypeVariableName "X"
-                Bound =
-                  { ClassName = ClassName "Object"
-                    TypeArguments = [] } } ]
-          Superclass =
-            { ClassName = ClassName "C4"
-              TypeArguments =
-                [ NonvariableType
-                      { ClassName = ClassName "C4"
-                        TypeArguments = [ TypeVariable(TypeVariableName "X") ] } ] }
+                        TypeArguments = [ TypeVariable(TypeVariableName "W") ] } ] }
           Fields = []
           Constructor = { Parameters = [] }
           Methods = [] }
@@ -349,7 +291,7 @@ module Example3 =
                   { ClassName = ClassName "N"
                     TypeArguments =
                       [ NonvariableType
-                            { ClassName = ClassName "C5"
+                            { ClassName = ClassName "C2"
                               TypeArguments =
                                 [ NonvariableType
                                       { ClassName = ClassName "T"
@@ -360,7 +302,7 @@ module Example3 =
                   { ClassName = ClassName "Tester"
                     TypeArguments =
                       [ NonvariableType
-                            { ClassName = ClassName "C5"
+                            { ClassName = ClassName "C2"
                               TypeArguments =
                                 [ NonvariableType
                                       { ClassName = ClassName "N"
@@ -376,5 +318,4 @@ module Example3 =
           Constructor = { Parameters = [] }
           Methods = [] }
 
-    let classDefs =
-        [ classN; classC0; classC1; classC2; classC3; classC4; classC5; classT; tester ]
+    let classDefs = [ classN; classC0; classC1; classC2; classT; tester ]

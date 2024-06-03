@@ -2,10 +2,11 @@ module TypeCheck.WFVar
 
 open AST
 open Utils
+open ClassTable
 
 let wfVar // 𝚫 ⊢ X ok
     (typeVariableName: TypeVariableName) // X
-    (typeEnv: TypeParameter list) // 𝚫
+    ((typeEnv, _, _): State) // 𝚫
     =
     if
         typeEnv

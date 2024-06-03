@@ -9,9 +9,11 @@
         <Compile Include="AST.fs" />
         <Compile Include="Utils.fs" />
         <Compile Include="ClassTable.fs" />
+        <Compile Include="Graph.fs" />
         <Compile Include="TypeCheck\SRefl.fs" />
-        <Compile Include="TypeCheck\SubtypeAssertion.fs" />
         <Compile Include="TypeCheck\WFObject.fs" />
+        <Compile Include="TypeCheck\Undecidable.fs" />
+        <Compile Include="TypeCheck\SubtypeAssertion.fs" />
         <Compile Include="TypeCheck\WFVar.fs" />
         <Compile Include="TypeCheck\WFClass.fs" />
         <Compile Include="TypeCheck\GTClass.fs" />
